@@ -265,10 +265,14 @@ public abstract class Feign {
       return target(new HardCodedTarget<T>(apiType, url));
     }
 
+    // TODO 这个是默认的创建入口.
     public <T> T target(Target<T> target) {
-      return build().newInstance(target);
+      return
+              build(). // 1. ReflectiveFeign
+                      newInstance(target); // 2. 为target(HardcodeTarget标识目标的服务名和接口)
     }
 
+    // 创建一个ReflectiveFeign
     public Feign build() {
       Client client = Capability.enrich(this.client, capabilities);
       Retryer retryer = Capability.enrich(this.retryer, capabilities);
@@ -287,6 +291,7 @@ public abstract class Feign {
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
               logLevel, decode404, closeAfterDecode, propagationPolicy, forceDecoding);
+      // 把所有的包装起来.
       ParseHandlersByName handlersByName =
           new ParseHandlersByName(contract, options, encoder, decoder, queryMapEncoder,
               errorDecoder, synchronousMethodHandlerFactory);

@@ -42,10 +42,14 @@ public class ReflectiveFeign extends Feign {
   /**
    * creates an api binding to the {@code target}. As this invokes reflection, care should be taken
    * to cache the result.
+   *
+   * 这里创建一个API(代理), 绑定到target(HardcodeTarget标识目标的服务名和接口)上.
+   * 还会缓存result.
    */
   @SuppressWarnings("unchecked")
   @Override
   public <T> T newInstance(Target<T> target) {
+    // 1. 创建出SynchronousMethodHandler
     Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
     Map<Method, MethodHandler> methodToHandler = new LinkedHashMap<Method, MethodHandler>();
     List<DefaultMethodHandler> defaultMethodHandlers = new LinkedList<DefaultMethodHandler>();
@@ -147,9 +151,13 @@ public class ReflectiveFeign extends Feign {
       this.decoder = checkNotNull(decoder, "decoder");
     }
 
+
+    // TODO 这个是为每个target准备methodHandler
     public Map<String, MethodHandler> apply(Target target) {
+      // 1. 这个是拿到SpringMvcContract来解析的: 解析出API的method的全部信息, 包装成MethodMetadata
       List<MethodMetadata> metadata = contract.parseAndValidateMetadata(target.type());
       Map<String, MethodHandler> result = new LinkedHashMap<String, MethodHandler>();
+      // 2. 把每个methodMetadata都解析一下, 生成MethodHandler.
       for (MethodMetadata md : metadata) {
         BuildTemplateByResolvingArgs buildTemplate;
         if (!md.formParams().isEmpty() && md.template().bodyTemplate() == null) {
