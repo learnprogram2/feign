@@ -106,7 +106,9 @@ final class SynchronousMethodHandler implements MethodHandler {
     }
   }
 
+  // TODO A.1 这里是执行
   Object executeAndDecode(RequestTemplate template, Options options) throws Throwable {
+    // 1. 执行了拦截器, 把template给到target上
     Request request = targetRequest(template);
 
     if (logLevel != Logger.Level.NONE) {
@@ -157,6 +159,7 @@ final class SynchronousMethodHandler implements MethodHandler {
   }
 
   Request targetRequest(RequestTemplate template) {
+    // 执行了拦截器
     for (RequestInterceptor interceptor : requestInterceptors) {
       interceptor.apply(template);
     }
